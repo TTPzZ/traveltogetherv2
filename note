@@ -1,0 +1,9 @@
+expo init "name"
+npx expo install react-native-web react-dom @expo/metro-runtime
+npm install --save antd @ant-design/icons date-fns firebase lodash react-router-dom styled-components
+// này để code giao diện chat
+npm install react-native-gesture-handler react-native-gifted-chat
+// này là map
+npm install react-native-maps --save-exact
+npm install react-native-gesture-handler
+
