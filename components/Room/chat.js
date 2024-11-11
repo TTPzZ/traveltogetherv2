@@ -25,6 +25,7 @@ export default function Chat() {
 
     // Lấy danh sách tin nhắn từ Firestore
     const messages = useFirestore('messages', condition);
+    console.log({messages})
 
     // Gửi tin nhắn mới
     const handleOnSubmit = () => {

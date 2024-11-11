@@ -9,6 +9,7 @@ export default function HamburgerButton() {
   //const { rooms, setSelectedRoomId } = React.useContext(AppContext);
 
   const { rooms,setinInviteMemberVisible,selectedRoomId,setSelectedRoomId}=  React.useContext(AppContext);
+  console.log({rooms})
 
   // const selectedRoom = React.useMemo( 
   // ()=> rooms.find((room)=> room.id === selectedRoomId),

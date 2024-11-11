@@ -25,6 +25,7 @@
     "react-native-gifted-chat": "^2.6.4",
     "react-native-web": "~0.19.10",
     "react-router-dom": "^6.27.0",
+    "react-router-native": "^6.28.0",
     "styled-components": "^6.1.13"
   },
   "devDependencies": {

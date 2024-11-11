@@ -34,7 +34,7 @@ import Login from './components/Login';
 import Room from './components/Room';
 
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-
+// import { NativeRouter, Route, Switch } from 'react-router-native';
 import AuthProvider from './Context/AuthProvider';
 import AppProvider from './Context/AppProvider';
 import InviteMemberModal from './components/Modals/InviteModal';
@@ -42,6 +42,7 @@ import InviteMemberModal from './components/Modals/InviteModal';
 export default function App() {
   return (
     <BrowserRouter>
+    {/* // <NativeRouter> */}
     <AuthProvider>
       <AppProvider>
         <Routes>
@@ -53,7 +54,8 @@ export default function App() {
       <InviteMemberModal/>
       </AppProvider>
     </AuthProvider>
-    </BrowserRouter>
+    {/* </NativeRouter> */}
+    // </BrowserRouter>
   );
 }
 
