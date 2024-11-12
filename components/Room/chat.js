@@ -22,10 +22,11 @@ export default function Chat() {
         operator: '==',
         compareValue: selectedRoom?.id,
     }), [selectedRoom?.id]);
+    console.log({selectedRoom})
 
     // Lấy danh sách tin nhắn từ Firestore
     const messages = useFirestore('messages', condition);
-    console.log({messages})
+
 
     // Gửi tin nhắn mới
     const handleOnSubmit = () => {
@@ -44,29 +45,31 @@ export default function Chat() {
     return (
         <View style={styles.container}>
             {selectedRoom ? (
-                <View style={styles.infoBar}>
-                    <Text style={styles.infoText}>{selectedRoom.name}</Text>
-                    <View style={styles.memberIcons}>
-                        {members.slice(0, 3).map((member, index) => (
-                            <Image
-                                key={member.id}
-                                source={{ uri: member.photoURL || defaultAvatar }}
-                                style={[styles.memberAvatar, { marginLeft: index > 0 ? -10 : 0 }]}
-                            />
-                        ))}
-                        {/* Nút thêm thành viên */}
-                        <TouchableOpacity
-                            style={styles.addMemberButton}
-                            onPress={() => setinInviteMemberVisible(true)}
-                        >
-                            <Text style={styles.addMemberText}>+</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
+               <View style={styles.infoBar}>
+               <View style={styles.centeredTextContainer}>
+                 <Text style={styles.infoText}>{selectedRoom.name}</Text>
+               </View>
+               <View style={styles.memberIcons}>
+                 {members.slice(0, 3).map((member, index) => (
+                   <Image
+                     key={member.id}
+                     source={{ uri: member.photoURL || defaultAvatar }}
+                     style={[styles.memberAvatar, { marginLeft: index > 0 ? -10 : 0 }]}
+                   />
+                 ))}
+                 {/* Nút thêm thành viên */}
+                 <TouchableOpacity
+                   style={styles.addMemberButton}
+                   onPress={() => setinInviteMemberVisible(true)}
+                 >
+                   <Text style={styles.addMemberText}>+</Text>
+                 </TouchableOpacity>
+               </View>
+             </View>
+             
             ) : (
                 <Text style={styles.infoText}>Chọn phòng để bắt đầu chat</Text>
             )}
-
             {/* Hiển thị danh sách tin nhắn */}
             <FlatList
                 data={messages}
@@ -117,6 +120,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         borderRadius: 10,
+    },
+    centeredTextContainer: {
+        flex: 1,
+        alignItems: 'center',
     },
     infoText: {
         fontSize: 18,

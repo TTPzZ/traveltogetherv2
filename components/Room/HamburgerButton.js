@@ -1,29 +1,27 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Modal, TextInput, Button, PanResponder } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Modal,
+  TextInput,
+  Button,
+  PanResponder,
+  TouchableWithoutFeedback,
+} from 'react-native';
 import useFirestore from '../../hooks/useFirestore';
 import { AuthContext } from '../../Context/AuthProvider';
 import { AppContext } from '../../Context/AppProvider';
 import { adddDocument } from '../../firebase/services';
 
 export default function HamburgerButton() {
-  //const { rooms, setSelectedRoomId } = React.useContext(AppContext);
-
-  const { rooms,setinInviteMemberVisible,selectedRoomId,setSelectedRoomId}=  React.useContext(AppContext);
-  console.log({rooms})
-
-  // const selectedRoom = React.useMemo( 
-  // ()=> rooms.find((room)=> room.id === selectedRoomId),
-  // [rooms, selectedRoomId]);
-  //console.log({rooms,selectedRoomId});
-  
+  const { rooms, setinInviteMemberVisible, selectedRoomId, setSelectedRoomId } = React.useContext(AppContext);
   const { user: { uid } } = React.useContext(AuthContext);
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isFriendsListOpen, setIsFriendsListOpen] = useState(false);
   const [isGroupsListOpen, setIsGroupsListOpen] = useState(false);
-  const [isAddFriendModalVisible, setIsAddFriendModalVisible] = useState(false);
   const [isAddGroupModalVisible, setIsAddGroupModalVisible] = useState(false);
-  const [friendName, setFriendName] = useState('');
   const [groupName, setGroupName] = useState('');
   const [email, setEmail] = useState('');
   const [showInviteModal, setShowInviteModal] = useState(false);
@@ -39,7 +37,7 @@ export default function HamburgerButton() {
       onPanResponderRelease: () => {
         pan.x = Math.max(0, pan.x);
         pan.y = Math.max(0, pan.y);
-      }
+      },
     })
   ).current;
 
@@ -51,23 +49,12 @@ export default function HamburgerButton() {
   function toggleMenu() {
     setIsMenuOpen(!isMenuOpen);
     if (isMenuOpen) {
-      setIsFriendsListOpen(false);
       setIsGroupsListOpen(false);
     }
   }
 
-  function toggleFriendsList() {
-    setIsFriendsListOpen(!isFriendsListOpen);
-    setIsGroupsListOpen(false);
-  }
-
   function toggleGroupsList() {
     setIsGroupsListOpen(!isGroupsListOpen);
-    setIsFriendsListOpen(false);
-  }
-
-  function openAddFriendModal() {
-    setIsAddFriendModalVisible(true);
   }
 
   function openAddGroupModal() {
@@ -75,9 +62,7 @@ export default function HamburgerButton() {
   }
 
   function closeModals() {
-    setIsAddFriendModalVisible(false);
     setIsAddGroupModalVisible(false);
-    setFriendName('');
     setGroupName('');
   }
 
@@ -87,142 +72,101 @@ export default function HamburgerButton() {
   }
 
   return (
-    <View
-      {...panResponder.panHandlers}
-      style={[
-        styles.container,
-        { transform: [{ translateX: pan.x }, { translateY: pan.y }] }
-      ]}
-    >
-      <TouchableOpacity style={styles.hamburgerButton} onPress={toggleMenu}>
-        <Text style={styles.buttonText}>☰</Text>
-      </TouchableOpacity>
-
-      {isMenuOpen && (
-        <View style={styles.menu}>
-          <TouchableOpacity style={styles.menuItem} onPress={toggleFriendsList}>
-            <Text style={styles.menuText}>Danh sách bạn bè</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.menuItem} onPress={toggleGroupsList}>
-            <Text style={styles.menuText}>Danh sách nhóm</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-
-      {isFriendsListOpen && (
-        <View style={styles.subMenu}>
-          <Text style={styles.subMenuTitle}>Danh sách bạn bè</Text>
-          <TouchableOpacity onPress={() => console.log('Button Pressed!')}>
-            <Text style={styles.subMenuText}>- Bạn A</Text>
-            <Text style={styles.subMenuText}>- Bạn B</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.addButton} onPress={openAddFriendModal}>
-            <Text style={styles.addButtonText}>Thêm bạn bè</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-
-      {isGroupsListOpen && (
-        <View style={styles.subMenu}>
-          <Text style={styles.subMenuTitle}>Danh sách nhóm</Text>
-          {rooms.map(room => (
-            <TouchableOpacity key={room.id} onPress={()=> setSelectedRoomId(room.id)}>
-              <Text style={styles.subMenuText}>{room.name}</Text>
-            </TouchableOpacity>
-          ))}
-          <TouchableOpacity style={styles.addButton} onPress={openAddGroupModal}>
-            <Text style={styles.addButtonText}>Thêm nhóm</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-
-      {/* Modal cho thêm bạn bè */}
-      <Modal
-        transparent={true}
-        animationType="slide"
-        visible={isAddFriendModalVisible}
-        onRequestClose={closeModals}
+    <TouchableWithoutFeedback onPress={() => isMenuOpen && setIsMenuOpen(false)}>
+      <View
+        {...panResponder.panHandlers}
+        style={[
+          styles.container,
+          { transform: [{ translateX: pan.x }, { translateY: pan.y }] },
+        ]}
       >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Thêm bạn bè</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Nhập tên bạn bè"
-              value={friendName}
-              onChangeText={setFriendName}
-            />
-            <TouchableOpacity style={styles.submitButton} onPress={closeModals}>
-              <Text style={styles.submitButtonText}>Xác nhận</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.closeButton} onPress={closeModals}>
-              <Text style={styles.closeButtonText}>Đóng</Text>
+        <TouchableOpacity style={styles.hamburgerButton} onPress={toggleGroupsList}>
+          <Text style={styles.buttonText}>☰</Text>
+        </TouchableOpacity>
+
+        {isMenuOpen && (
+          <View style={styles.menu}>
+            <TouchableOpacity style={styles.menuItem} onPress={toggleMenu}>
+              <Text style={styles.menuText}>Danh sách nhóm</Text>
             </TouchableOpacity>
           </View>
-        </View>
-      </Modal>
+        )}
 
-      {/* Modal cho thêm nhóm */}
-      <Modal
-        transparent={true}
-        animationType="slide"
-        visible={isAddGroupModalVisible}
-        onRequestClose={closeModals}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Thêm nhóm</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Nhập tên nhóm"
-              value={groupName}
-              onChangeText={setGroupName}
-            />
-            <TouchableOpacity style={styles.submitButton} onPress={AddRoomsModals}>
-              <Text style={styles.submitButtonText}>Xác nhận</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.closeButton} onPress={closeModals}>
-              <Text style={styles.closeButtonText}>Đóng</Text>
+        {isGroupsListOpen && (
+          <View style={styles.subMenu}>
+            <Text style={styles.subMenuTitle}>Danh sách nhóm</Text>
+            {rooms.map(room => (
+              <TouchableOpacity key={room.id} onPress={() => setSelectedRoomId(room.id)}>
+                <Text style={styles.subMenuText}>{room.name}</Text>
+              </TouchableOpacity>
+            ))}
+            <TouchableOpacity style={styles.addButton} onPress={openAddGroupModal}>
+              <Text style={styles.addButtonText}>Thêm nhóm</Text>
             </TouchableOpacity>
           </View>
-        </View>
-      </Modal>
+        )}
 
-      {/* Modal mời bạn */}
-      <Modal
-        visible={showInviteModal}
-        onRequestClose={() => setShowInviteModal(false)}
-      >
-        <View style={styles.inviteModal}>
-          <Text>Nhập email người bạn muốn mời:</Text>
-          <TextInput
-            value={email}
-            onChangeText={setEmail}
-            placeholder="Email"
-            style={styles.input}
-          />
-          <Button title="Gửi lời mời" onPress={handleInvite} />
-          <Button title="Hủy" onPress={() => setShowInviteModal(false)} />
-        </View>
-      </Modal>
-    </View>
+        <Modal
+          transparent={true}
+          animationType="slide"
+          visible={isAddGroupModalVisible}
+          onRequestClose={closeModals}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Thêm nhóm</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Nhập tên nhóm"
+                value={groupName}
+                onChangeText={setGroupName}
+              />
+              <TouchableOpacity style={styles.submitButton} onPress={AddRoomsModals}>
+                <Text style={styles.submitButtonText}>Xác nhận</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.closeButton} onPress={closeModals}>
+                <Text style={styles.closeButtonText}>Đóng</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+
+        <Modal
+          visible={showInviteModal}
+          onRequestClose={() => setShowInviteModal(false)}
+        >
+          <View style={styles.inviteModal}>
+            <Text>Nhập email người bạn muốn mời:</Text>
+            <TextInput
+              value={email}
+              onChangeText={setEmail}
+              placeholder="Email"
+              style={styles.input}
+            />
+            <Button title="Gửi lời mời" onPress={handleInvite} />
+            <Button title="Hủy" onPress={() => setShowInviteModal(false)} />
+          </View>
+        </Modal>
+      </View>
+    </TouchableWithoutFeedback>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     position: 'absolute',
-    top: 100,       // Đặt nút lên góc trên
-    right: 0,      // Đặt nút vào góc trái
+    top: 0,
+    left: 0,
     zIndex: 1000,
-    padding: 10,  // Thêm padding để nút không chạm sát vào cạnh
+    padding: 10,
   },
   hamburgerButton: {
-    padding: 12,
+    paddingVertical: 9,
+    paddingHorizontal: 12,
     backgroundColor: '#3498db',
     borderRadius: 5,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.3,
     shadowRadius: 2,
     elevation: 3,
@@ -329,4 +273,3 @@ const styles = StyleSheet.create({
     padding: 20,
   },
 });
-

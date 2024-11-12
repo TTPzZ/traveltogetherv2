@@ -780,10 +780,10 @@
 // });
 
 //#endregion
-
 import React, { useContext, useState, useEffect, useCallback } from 'react';
 import { View, Text, TextInput, Modal, StyleSheet, TouchableOpacity, FlatList, Image } from 'react-native';
 import { AppContext } from '../../Context/AppProvider';
+import { AuthContext } from '../../Context/AuthProvider';
 import { db } from '../../firebase/config';
 
 // Debounce function to control input frequency
@@ -800,7 +800,7 @@ async function fetchUserList(search, curMembers = []) {
   try {
       const snapshot = await db
           .collection('users')
-          .where('keywords', 'array-contains', search.toLowerCase()) // Chuyển từ khóa thành chữ thường
+          .where('keywords', 'array-contains', search.toLowerCase())
           .orderBy('displayName')
           .limit(20)
           .get();
@@ -811,17 +811,21 @@ async function fetchUserList(search, curMembers = []) {
               value: doc.data().uid,
               photoURL: doc.data().photoURL,
           }))
-          .filter(opt => !curMembers.includes(opt.value)); // Lọc thành viên đã thêm
+          .filter(opt => !curMembers.includes(opt.value));
   } catch (error) {
       console.error("Lỗi khi lấy danh sách người dùng:", error);
       return [];
   }
 }
 
-
-
 // Invite Member Modal component
 export default function InviteMemberModal() {
+
+    const {
+        user: { uid },
+    } = useContext(AuthContext); 
+
+    
     const { inInviteMemberVisible, setinInviteMemberVisible, selectedRoomId, selectedRoom } = useContext(AppContext);
     const [searchText, setSearchText] = useState('');
     const [members, setMembers] = useState([]);
@@ -854,9 +858,22 @@ export default function InviteMemberModal() {
                 members: [...selectedRoom.members, member.value],
             });
             setinInviteMemberVisible(false);
-            setSearchText(''); // Reset search text
+            setSearchText('');
         } catch (error) {
             console.error("Error adding member:", error);
+        }
+    };
+
+    // Handle leaving the room
+    const handleLeaveRoom = async () => {
+        try {
+            const roomRef = db.collection('rooms').doc(selectedRoomId);
+            await roomRef.update({
+                members: selectedRoom.members.filter((memberId) => memberId !== uid),
+            });
+            setinInviteMemberVisible(false); // Đóng modal sau khi rời nhóm
+        } catch (error) {
+            console.error("Error leaving room:", error);
         }
     };
 
@@ -910,6 +927,12 @@ export default function InviteMemberModal() {
                             onPress={() => setinInviteMemberVisible(false)}
                         >
                             <Text style={styles.buttonText}>Thoát</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[styles.modalButton, styles.leaveButton]}
+                            onPress={handleLeaveRoom}
+                        >
+                            <Text style={styles.buttonText}>Rời nhóm</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -996,6 +1019,9 @@ const styles = StyleSheet.create({
     },
     cancelButton: {
         backgroundColor: '#FF5252',
+    },
+    leaveButton: {
+        backgroundColor: '#757575',
     },
     buttonText: {
         color: '#FFF',

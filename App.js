@@ -55,7 +55,7 @@ export default function App() {
       </AppProvider>
     </AuthProvider>
     {/* </NativeRouter> */}
-    // </BrowserRouter>
+    </BrowserRouter>
   );
 }
 
