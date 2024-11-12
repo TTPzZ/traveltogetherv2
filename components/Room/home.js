@@ -1,139 +1,56 @@
-// // home.js
-// import React, { useEffect } from 'react';
-
-// function Home() {
-//   useEffect(() => {
-//     // Thêm Google Maps script vào HTML
-//     const script = document.createElement('script');
-//     script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyCsObo5ScqTGIfsUZpm27GjZf4-qmAu19E&callback=initMap`;
-//     script.async = true;
-//     window.initMap = function () {
-//       new window.google.maps.Map(document.getElementById('map'), {
-//         center: { lat: 10.8231, lng: 106.6297 }, // Tọa độ cho Hồ Chí Minh
-//         zoom: 10,
-//       });
-//     };
-//     document.head.appendChild(script);
-
-//     return () => {
-//       // Xóa script khi component bị tháo gỡ
-//       document.head.removeChild(script);
-//     };
-//   }, []);
-
-//   return (
-//     <div style={{ textAlign: 'center', marginTop: '20px' }}>
-//       <h1>Travel Together</h1>
-//       <div
-//         id="map"
-//         style={{
-//           position: 'relative',
-//           width: '100%',
-//           height: 'calc(88vh - 100px)', // Đảm bảo chiếm không gian chính xác
-//           maxHeight: '600px',             // Giới hạn chiều cao nếu cần
-//           border: '1px solid #ccc',
-//         }}
-//       ></div>
-//     </div>
-//   );
-// }
-
-// export default Home;
-// Khối lệnh import
-
-// Import các thư viện và module cần thiết để sử dụng trong component Home.
+// home.js
 import React, { useEffect, useState, useContext } from 'react';
-import { db } from '../../firebase/config'; // Kết nối tới cấu hình Firebase Firestore
-import { AppContext } from '../../Context/AppProvider'; // Truy cập các giá trị từ AppContext
+import { db } from '../../firebase/config';
+import { AppContext } from '../../Context/AppProvider';
 import { AuthContext } from '../../Context/AuthProvider';
+import NameImage from '../../assets/Image/Name.png';
 
-// Định nghĩa component Home
 function Home() {
-  const { selectedRoom } = useContext(AppContext); // Lấy thông tin room đã chọn từ context
-
+  const { selectedRoom } = useContext(AppContext);
   const {
     user: { displayName, photoURL, uid },
-  } = useContext(AuthContext); // Lấy thông tin user hiện tại từ context
+  } = useContext(AuthContext);
 
-  const [map, setMap] = useState(null); // Trạng thái lưu trữ instance bản đồ
-  const [markers, setMarkers] = useState([]); // Trạng thái lưu trữ các marker trên bản đồ
-  const [userLocation, setUserLocation] = useState(null); // Trạng thái lưu vị trí hiện tại của người dùng
+  const [map, setMap] = useState(null);
+  const [markers, setMarkers] = useState([]);
+  const [userLocation, setUserLocation] = useState(null);
 
-  // useEffect để tải Google Maps API và thiết lập bản đồ
   useEffect(() => {
-    // Nếu chưa chọn room thì không tải bản đồ
     if (!selectedRoom?.id) {
-      setMap(null); // Xóa instance của bản đồ khi chưa có room được chọn
-      return; // Thoát khỏi useEffect nếu chưa chọn room
+      setMap(null);
+      return;
     }
 
-    // Tạo một script để tải Google Maps API và thiết lập callback initMap
     const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyCsObo5ScqTGIfsUZpm27GjZf4-qmAu19E&callback=initMap`; // Đảm bảo có key hợp lệ
+    script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyCsObo5ScqTGIfsUZpm27GjZf4-qmAu19E&callback=initMap`;
     script.async = true;
 
-    // Hàm khởi tạo bản đồ và thiết lập center ban đầu
     window.initMap = function () {
       const mapInstance = new window.google.maps.Map(document.getElementById('map'), {
-        center: { lat: 10.8231, lng: 106.6297 }, // Tọa độ mặc định tại Hồ Chí Minh
-        zoom: 10, // Thiết lập mức độ thu phóng
+        center: { lat: 10.8231, lng: 106.6297 },
+        zoom: 10,
       });
-      setMap(mapInstance); // Lưu instance của bản đồ vào state
+      setMap(mapInstance);
     };
 
-    document.head.appendChild(script); // Thêm script vào document để tải API
+    document.head.appendChild(script);
 
-    // Lấy vị trí hiện tại của người dùng
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
-        setUserLocation({ lat: latitude, lng: longitude }); // Cập nhật state vị trí của người dùng
+        setUserLocation({ lat: latitude, lng: longitude });
       },
       (error) => console.error("Error fetching user location:", error),
-      { enableHighAccuracy: true } // Cài đặt độ chính xác cao cho việc định vị
+      { enableHighAccuracy: true }
     );
 
-    // Xóa script khỏi document khi component unmount
     return () => {
       document.head.removeChild(script);
     };
-  }, [selectedRoom?.id]); // useEffect sẽ chạy lại khi selectedRoom?.id thay đổi
-
-  // // useEffect để cập nhật vị trí người dùng lên Firestore và hiển thị marker
-  // useEffect(() => {
-  //   if (userLocation && map && selectedRoom?.id) {
-  //     // Cập nhật vị trí của người dùng lên Firestore
-  //     db.collection('locations').doc(uid).set({
-  //       uid,
-  //       photoURL,
-  //       roomId: selectedRoom.id,
-  //       displayName,
-  //       location: userLocation,
-  //       timestamp: new Date(),
-  //     });
-
-  //     // Tạo một marker cho vị trí của người dùng và thêm vào bản đồ
-  //     const userMarker = new window.google.maps.Marker({
-  //       position: userLocation,
-  //       map: map,
-  //       title: "My Location",
-  //       icon: {
-  //         url: photoURL, // URL ảnh đại diện
-  //         scaledSize: new window.google.maps.Size(40, 40), // Kích thước ảnh
-  //         origin: new window.google.maps.Point(0, 0), // Điểm gốc của ảnh
-  //         anchor: new window.google.maps.Point(20, 20), // Vị trí neo của ảnh trên bản đồ
-  //       },
-  //     });
-  //     setMarkers((prevMarkers) => [...prevMarkers, userMarker]); // Lưu trữ marker vào state
-  //     map.setCenter(userLocation); // Đặt center bản đồ về vị trí người dùng
-  //   }
-  // }, [userLocation, map, selectedRoom?.id]); // useEffect sẽ chạy lại khi userLocation, map hoặc selectedRoom?.id thay đổi
-
-
+  }, [selectedRoom?.id]);
 
   useEffect(() => {
     if (userLocation && map && selectedRoom?.id) {
-      // Cập nhật vị trí của người dùng lên Firestore
       db.collection('locations').doc(uid).set({
         uid,
         photoURL,
@@ -142,102 +59,126 @@ function Home() {
         location: userLocation,
         timestamp: new Date(),
       });
-  
-      // Tạo một marker cho vị trí của người dùng và thêm vào bản đồ
+
       const userMarker = new window.google.maps.Marker({
         position: userLocation,
         map: map,
         title: "My Location",
         icon: {
-          url: photoURL, // Sử dụng trực tiếp URL ảnh mà không cần qua canvas
-          scaledSize: new window.google.maps.Size(40, 40), // Đảm bảo kích thước ảnh vừa phải
+          url: photoURL,
+          scaledSize: new window.google.maps.Size(40, 40),
         },
       });
-  
-      // Tạo một InfoWindow để hiển thị tên người dùng
+
       const infoWindow = new window.google.maps.InfoWindow({
         content: `<div style="text-align: center; font-weight: bold;">
                     ${displayName}
-                  </div>`, // Nội dung chứa tên người dùng
+                  </div>`,
       });
-  
-      // Mở InfoWindow ngay lập tức bên dưới marker
+
       infoWindow.open(map, userMarker);
-  
-      setMarkers((prevMarkers) => [...prevMarkers, userMarker]); // Lưu trữ marker vào state
-      map.setCenter(userLocation); // Đặt center bản đồ về vị trí người dùng
+
+      setMarkers((prevMarkers) => [...prevMarkers, userMarker]);
+      map.setCenter(userLocation);
     }
   }, [userLocation, map, selectedRoom?.id]);
-  
+
   useEffect(() => {
     if (map && selectedRoom?.id) {
-      // Lắng nghe các thay đổi của vị trí trong room
       const unsubscribe = db
         .collection('locations')
-        .where('roomId', '==', selectedRoom.id) // Lọc các tài liệu có roomId trùng với room được chọn
+        .where('roomId', '==', selectedRoom.id)
         .onSnapshot((snapshot) => {
-          // Xóa tất cả các marker cũ khi có thay đổi
           markers.forEach((marker) => marker.setMap(null));
-          setMarkers([]); // Đặt lại state markers thành mảng rỗng
-  
-          // Tạo các marker mới cho mỗi tài liệu trong snapshot
+          setMarkers([]);
+
           const newMarkers = snapshot.docs.map((doc) => {
             const data = doc.data();
-            if (data.location && doc.id !== uid) { // Chỉ hiển thị các thành viên khác
+            if (data.location && doc.id !== uid) {
               const memberMarker = new window.google.maps.Marker({
                 position: data.location,
                 map: map,
                 title: data.displayName || `Member ${doc.id}`,
                 icon: {
-                  url: data.photoURL || 'defaultIconURL', // Sử dụng ảnh đại diện nếu có, hoặc biểu tượng mặc định
+                  url: data.photoURL || 'defaultIconURL',
                   scaledSize: new window.google.maps.Size(40, 40),
                 },
               });
-  
-              // Tạo một InfoWindow cho mỗi marker của thành viên
+
               const infoWindow = new window.google.maps.InfoWindow({
                 content: `<div style="text-align: center; font-weight: bold;">
                             ${data.displayName || 'Unknown User'}
-                          </div>`, // Nội dung chứa tên của thành viên
+                          </div>`,
               });
-  
-              // Liên kết InfoWindow với marker và hiển thị ngay lập tức
+
               infoWindow.open(map, memberMarker);
-  
+
               return memberMarker;
             }
             return null;
-          }).filter(Boolean); // Loại bỏ các marker null
-  
-          // Cập nhật lại state với các markers mới
+          }).filter(Boolean);
+
           setMarkers(newMarkers);
         });
-  
-      // Hủy lắng nghe khi component unmount hoặc khi selectedRoom?.id thay đổi
+
       return () => unsubscribe();
     }
   }, [map, selectedRoom?.id]);
-  
-  // Trả về giao diện của component
+
   return (
-    <div style={{ textAlign: 'center', marginTop: '20px' }}>
-      <h1>Travel Together</h1>
+    <div style={styles.container}>
+      <img style={styles.imgName} src="assets/Image/Name.png" alt="Travel Together" />
+
       {!selectedRoom?.id ? (
-        <p>Hãy chọn room trước</p> // Thông báo hiển thị khi chưa có room được chọn
+        <div style={styles.notificationContainer}>
+          <p style={styles.notificationText}>Hãy chọn room trước</p>
+        </div>
       ) : (
-        <div
-          id="map"
-          style={{
-            position: 'relative',
-            width: '100%',
-            height: 'calc(88vh - 100px)',
-            maxHeight: '600px',
-            border: '1px solid #ccc',
-          }}
-        ></div>
+        <div id="map" style={styles.mapContainer}></div>
       )}
     </div>
   );
 }
 
 export default Home;
+
+const styles = {
+  container: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    height: '100vh',
+    backgroundColor: '#E0F7FA',
+  },
+  imgName:{
+    width: '80%',
+    height: 'auto',
+    marginLeft: 'auto',
+    marginTop:'10px',
+  },
+  notificationContainer: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '80%',
+    height: '100%',
+    margin: '0 auto',
+    border: '1px solid #ccc',
+    borderRadius: '8px',
+    padding: '20px',
+    backgroundColor: '#f9f9f9',
+    boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
+  },
+  notificationText: {
+    fontSize: '18px',
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  mapContainer: {
+    position: 'relative',
+    width: '100%',
+    height: 'calc(100vh - 150px)',
+    border: '1px solid #ccc',
+    borderRadius: '8px',
+  },
+};

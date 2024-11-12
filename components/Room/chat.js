@@ -13,22 +13,16 @@ export default function Chat() {
     } = useContext(AuthContext);
 
     const { setinInviteMemberVisible, selectedRoom, members } = useContext(AppContext);
-
     const [inputValue, setInputValue] = useState('');
 
-    // Điều kiện để lấy dữ liệu từ Firestore theo `roomId`
     const condition = React.useMemo(() => ({
         fieldName: 'roomId',
         operator: '==',
         compareValue: selectedRoom?.id,
     }), [selectedRoom?.id]);
-    console.log({selectedRoom})
 
-    // Lấy danh sách tin nhắn từ Firestore
     const messages = useFirestore('messages', condition);
 
-
-    // Gửi tin nhắn mới
     const handleOnSubmit = () => {
         if (inputValue.trim()) {
             adddDocument('messages', {
@@ -38,42 +32,39 @@ export default function Chat() {
                 roomId: selectedRoom.id,
                 displayName,
             });
-            setInputValue(''); // Reset ô nhập sau khi gửi
+            setInputValue('');
         }
     };
 
     return (
         <View style={styles.container}>
             {selectedRoom ? (
-               <View style={styles.infoBar}>
-               <View style={styles.centeredTextContainer}>
-                 <Text style={styles.infoText}>{selectedRoom.name}</Text>
-               </View>
-               <View style={styles.memberIcons}>
-                 {members.slice(0, 3).map((member, index) => (
-                   <Image
-                     key={member.id}
-                     source={{ uri: member.photoURL || defaultAvatar }}
-                     style={[styles.memberAvatar, { marginLeft: index > 0 ? -10 : 0 }]}
-                   />
-                 ))}
-                 {/* Nút thêm thành viên */}
-                 <TouchableOpacity
-                   style={styles.addMemberButton}
-                   onPress={() => setinInviteMemberVisible(true)}
-                 >
-                   <Text style={styles.addMemberText}>+</Text>
-                 </TouchableOpacity>
-               </View>
-             </View>
-             
+                <View style={styles.infoBar}>
+                    <View style={styles.centeredTextContainer}>
+                        <Text style={styles.infoText}>{selectedRoom.name}</Text>
+                    </View>
+                    <View style={styles.memberIcons}>
+                        {members.slice(0, 3).map((member, index) => (
+                            <Image
+                                key={member.id}
+                                source={{ uri: member.photoURL || defaultAvatar }}
+                                style={[styles.memberAvatar, { marginLeft: index > 0 ? -10 : 0 }]}
+                            />
+                        ))}
+                        <TouchableOpacity
+                            style={styles.addMemberButton}
+                            onPress={() => setinInviteMemberVisible(true)}
+                        >
+                            <Text style={styles.addMemberText}>+</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
             ) : (
                 <Text style={styles.infoText}>Chọn phòng để bắt đầu chat</Text>
             )}
-            {/* Hiển thị danh sách tin nhắn */}
             <FlatList
                 data={messages}
-                keyExtractor={(item) => item.id} // Sử dụng `item.id` làm `key`
+                keyExtractor={(item) => item.id}
                 renderItem={({ item }) => (
                     <View
                         style={[
@@ -92,8 +83,6 @@ export default function Chat() {
                 )}
                 style={styles.messageList}
             />
-
-            {/* Ô nhập tin nhắn */}
             <View style={styles.inputArea}>
                 <TextInput
                     style={styles.input}
@@ -101,7 +90,9 @@ export default function Chat() {
                     value={inputValue}
                     onChangeText={setInputValue}
                 />
-                <Button title="Gửi" onPress={handleOnSubmit} />
+                <TouchableOpacity style={styles.sendButton} onPress={handleOnSubmit}>
+                    <Text style={styles.sendButtonText}>Gửi</Text>
+                </TouchableOpacity>
             </View>
         </View>
     );
@@ -111,24 +102,30 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 10,
-        backgroundColor: '#E8F5E9',
+        backgroundColor: '#E3F2FD', // Xanh dương nhạt nền
     },
     infoBar: {
-        backgroundColor: '#C8E6C9',
+        backgroundColor: '#BBDEFB',
         padding: 10,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        borderRadius: 10,
+        borderRadius: 15,
+        marginBottom: 10,
+        elevation: 2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
     },
     centeredTextContainer: {
         flex: 1,
         alignItems: 'center',
     },
     infoText: {
-        fontSize: 18,
+        fontSize: 20,
         fontWeight: 'bold',
-        color: '#2E7D32',
+        color: '#0D47A1',
     },
     memberIcons: {
         flexDirection: 'row',
@@ -145,7 +142,7 @@ const styles = StyleSheet.create({
         width: 30,
         height: 30,
         borderRadius: 15,
-        backgroundColor: '#2E7D32',
+        backgroundColor: '#1976D2',
         alignItems: 'center',
         justifyContent: 'center',
         marginLeft: -10,
@@ -163,25 +160,35 @@ const styles = StyleSheet.create({
     },
     messageItem: {
         flexDirection: 'row',
-        marginBottom: 10,
+        marginBottom: 8,
         padding: 10,
-        borderRadius: 10,
-        maxWidth: '80%',
+        borderRadius: 15,
+        maxWidth: '75%',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 3,
     },
     myMessage: {
-        backgroundColor: '#A5D6A7',
+        backgroundColor: '#BBDEFB',
     },
     otherMessage: {
-        backgroundColor: '#FFCDD2',
+        backgroundColor: '#E3F2FD',
     },
     messageContent: {
         padding: 10,
         borderRadius: 10,
+        backgroundColor: '#FFFFFF',
+        shadowColor: '#000',
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        shadowOffset: { width: 0, height: 2 },
         maxWidth: '90%',
     },
     userName: {
         fontWeight: 'bold',
-        color: '#1B5E20',
+        color: '#1E88E5',
+        marginBottom: 4,
     },
     timestamp: {
         fontSize: 10,
@@ -192,18 +199,42 @@ const styles = StyleSheet.create({
         height: 40,
         borderRadius: 20,
         marginRight: 10,
+        borderColor: '#0D47A1',
+        borderWidth: 1,
     },
     inputArea: {
         flexDirection: 'row',
         alignItems: 'center',
+        backgroundColor: '#FFFFFF',
+        borderRadius: 25,
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+        elevation: 2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
     },
     input: {
         flex: 1,
-        borderColor: '#BDBDBD',
+        fontSize: 16,
+        paddingLeft: 15,
+        borderColor: '#90CAF9',
         borderWidth: 1,
-        padding: 10,
-        borderRadius: 5,
+        borderRadius: 20,
         marginRight: 10,
-        backgroundColor: '#FFF',
+        backgroundColor: '#FFFFFF',
+        height: 40,
+    },
+    sendButton: {
+        backgroundColor: '#0D47A1',
+        borderRadius: 20,
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+    },
+    sendButtonText: {
+        color: '#FFFFFF',
+        fontSize: 16,
+        fontWeight: 'bold',
     },
 });
