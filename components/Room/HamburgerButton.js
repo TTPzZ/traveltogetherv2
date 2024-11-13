@@ -84,20 +84,19 @@ export default function HamburgerButton() {
           <Text style={styles.buttonText}>☰</Text>
         </TouchableOpacity>
 
-        {isMenuOpen && (
-          <View style={styles.menu}>
-            <TouchableOpacity style={styles.menuItem} onPress={toggleMenu}>
-              <Text style={styles.menuText}>Danh sách nhóm</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-
         {isGroupsListOpen && (
           <View style={styles.subMenu}>
             <Text style={styles.subMenuTitle}>Danh sách nhóm</Text>
             {rooms.map(room => (
-              <TouchableOpacity key={room.id} onPress={() => setSelectedRoomId(room.id)}>
-                <Text style={styles.subMenuText}>{room.name}</Text>
+              <TouchableOpacity
+                key={room.id}
+                onPress={() => setSelectedRoomId(room.id)}
+                style={[
+                  styles.roomItem,
+                  selectedRoomId === room.id && styles.selectedRoom,
+                ]}
+              >
+                <Text style={styles.roomText}>{room.name}</Text>
               </TouchableOpacity>
             ))}
             <TouchableOpacity style={styles.addButton} onPress={openAddGroupModal}>
@@ -176,21 +175,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
   },
-  menu: {
-    marginTop: 10,
-    backgroundColor: '#ecf0f1',
-    borderRadius: 8,
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    elevation: 2,
-  },
-  menuItem: {
-    padding: 10,
-  },
-  menuText: {
-    fontSize: 18,
-    color: '#2c3e50',
-  },
   subMenu: {
     marginTop: 10,
     backgroundColor: '#ecf0f1',
@@ -208,7 +192,21 @@ const styles = StyleSheet.create({
     color: '#2980b9',
     marginBottom: 10,
   },
-  subMenuText: {
+  roomItem: {
+    paddingVertical: 12,
+    paddingHorizontal: 15,
+    backgroundColor: '#f0f0f5',
+    borderRadius: 8,
+    marginVertical: 5,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 1 },
+    shadowRadius: 1,
+  },
+  selectedRoom: {
+    backgroundColor: '#3498db',
+  },
+  roomText: {
     fontSize: 16,
     color: '#34495e',
   },

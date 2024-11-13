@@ -131,7 +131,7 @@ function Home() {
 
       {!selectedRoom?.id ? (
         <div style={styles.notificationContainer}>
-          <p style={styles.notificationText}>Hãy chọn room trước</p>
+          <p style={styles.notificationText}>Hãy chọn nhóm trước</p>
         </div>
       ) : (
         <div id="map" style={styles.mapContainer}></div>

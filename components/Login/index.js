@@ -4,9 +4,11 @@ import { StyleSheet, Text, View, TouchableOpacity, TextInput, Image } from 'reac
 import { auth, db } from '../../firebase/config';
 import { FacebookAuthProvider, signInWithPopup } from 'firebase/auth';
 import { adddDocument, generateKeywords } from '../../firebase/services';
+import { GoogleAuthProvider } from 'firebase/auth';
 
-const logoImage = require('../../assets/Image/ens2.png');
+const logoImage = require('../../assets/Image/Logo1.png');
 const fbProvider = new FacebookAuthProvider();
+const ggProvider = new GoogleAuthProvider();
 
 export default function Login() {
   const handleFblogin = async () => {
@@ -30,6 +32,27 @@ export default function Login() {
     }
   };
 
+  const handleGglogin = async () => {
+    try {
+      const { additionalUserInfo, user } = await auth.signInWithPopup(ggProvider);
+      if (additionalUserInfo?.isNewUser) {
+        adddDocument('users', {
+          displayName: user.displayName,
+          email: user.email,
+          photoURL: user.photoURL,
+          uid: user.uid,
+          providerId: additionalUserInfo.providerId,
+          keywords: generateKeywords(user.displayName),
+        });
+        console.log("New user added to Firestore:", user.displayName);
+      } else {
+        console.log("Existing user - no need to add to Firestore");
+      }
+    } catch (error) {
+      console.error("Error signing in with Google:", error);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.logoContainer}>
@@ -48,7 +71,7 @@ export default function Login() {
 
       {/* Row for Social Login Buttons */}
       <View style={styles.buttonRow}>
-        <TouchableOpacity style={[styles.button, styles.googleButton]} onPress={() => {}}>
+        <TouchableOpacity style={[styles.button, styles.googleButton]} onPress={handleGglogin}>
           <Text style={styles.buttonText}>Login With Google</Text>
         </TouchableOpacity>
 

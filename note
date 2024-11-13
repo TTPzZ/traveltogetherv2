@@ -4,6 +4,9 @@ npm install --save antd @ant-design/icons date-fns firebase lodash react-router-
 // này để code giao diện chat
 npm install react-native-gesture-handler react-native-gifted-chat
 // này là map
-npm install react-native-maps --save-exact
-npm install react-native-gesture-handler
+npm install react-native-maps
+// này để login băng google
+npm install @react-native-google-signin/google-signin
+
+
 
